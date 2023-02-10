@@ -1,16 +1,16 @@
 # LaunchTask
 
-Language: English | [中文](README-ZH.md)
+Language: [English](README.md) | 中文
 
-This is a lib for managing App launch tasks.
-A large App often needs to perform a large number of tasks during the launch phase. If there are many app developers, it is easy to cause the code of AppDelegate to be modified frequently and become more and more bloated. It is also easy to cause the launch time of the App to be longer, and it will eventually be killed by Watchdog.
-This lib encapsulates the launch code into subclasses of each Task, and configures the execution order and dependencies of Tasks through Workflow. At the same time, by blocking the didFinishLaunch method, tasks are executed concurrently to speed up the launch time.
+这是一个管理App启动任务的框架。
+一个大型的App往往需要在启动阶段执行大量的任务。如果App的开发人员很多，容易导致AppDelegate的代码频繁修改，越来越臃肿。也容易导致App的启动时长变长，最终被Watchdog杀死。
+本框架是将启动的代码封装到一个个Task的子类中，通过Workflow配置Task的执行顺序和依赖。同时通过阻塞didFinishLaunch方法，并发执行任务，加快启动时间。
 
 ## Example
 
-Assume that when the App launchs, the initialization steps in the figure below need to be performed. Then it can be managed through two Workflows.
+假设在App启动的时候，需要执行下图中的初始化步骤。则可以通过两个Workflow来管理。
 <img src="https://github.com/jayden320/launch-task/blob/master/example.jpg">
-didFinishLaunch phase
+didFinishLaunch阶段
 ```
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 ```
-viewDidAppear phase
+viewDidAppear阶段
 ```
 class ViewController: UIViewController {
     var firstScreenWorkflow = TaskWorkflow(name: "FirstScreen")
@@ -52,7 +52,7 @@ class ViewController: UIViewController {
 }
 
 ```
-The above example is to execute the start method of workflow directly in viewDidAppear. If you want to perform a specific task after the first frame is rendered, you can also execute the start method in the CFRunLoopActivity.beforeTimers callback.
+以上示例是直接在viewDidAppear中执行workflow的start方法。如果想在首帧渲染完成后执行特定的任务，也可以在CFRunLoopActivity.beforeTimers回调中执行start方法。
 
 ## Install
 ```

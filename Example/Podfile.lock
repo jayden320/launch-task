@@ -1,0 +1,16 @@
+PODS:
+  - LaunchTask (0.1.1)
+
+DEPENDENCIES:
+  - LaunchTask (from `../`)
+
+EXTERNAL SOURCES:
+  LaunchTask:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  LaunchTask: 03e9243032e1aa5b79a149d8a1acc45554615913
+
+PODFILE CHECKSUM: ca2b8081ef2c47cf7afa1fcac1055b40ded316dd
+
+COCOAPODS: 1.11.3

@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '10.0'
+
+target 'LaunchTask_Example' do
+  pod 'LaunchTask', :path => '../'
+
+  target 'LaunchTask_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
