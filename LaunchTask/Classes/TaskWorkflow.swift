@@ -8,7 +8,7 @@
 
 import Foundation
 
-class WaitTask: LaunchTask {
+public class WaitTask: LaunchTask {
     public override func main(context: [AnyHashable: Any]?) {
         guard let semaphore = workflow?.semaphore else {
             assertionFailure("No semaphore found, unable to wait")
@@ -46,6 +46,10 @@ public class TaskWorkflow {
         self.name = name
     }
 
+    public func allTasks() -> [LaunchTask] {
+        tasks
+    }
+    
     public func setBlockingTasks(_ blockingTasks: [LaunchTask]) {
         parseNodes(blockingTasks)
         if let _ = tasks.first(where: { $0.queue == .concurrentQueue }) {
@@ -64,7 +68,7 @@ public class TaskWorkflow {
     }
 
     public func addTask(_ task: LaunchTask) {
-        log("Add task \(NSStringFromClass(task.classForCoder)) in \(task.queue == .mainQueue ? "main queue" : "concurrent queue")")
+        TaskWorkflow.log("Add task \(NSStringFromClass(task.classForCoder)) in \(task.queue == .mainQueue ? "main queue" : "concurrent queue")")
         task.delegate = self
         task.workflow = self
 
@@ -104,20 +108,20 @@ public class TaskWorkflow {
 extension TaskWorkflow: TaskDelegate {
     func taskDidStart(_ task: LaunchTask) {
         if task.queue == .mainQueue {
-            log("Task start in main thread: \(String(describing: type(of: task)))")
+            TaskWorkflow.log("Task start in main thread: \(String(describing: type(of: task)))")
         } else {
-            log("Task start in concurrent thread: \(String(describing: type(of: task)))")
+            TaskWorkflow.log("Task start in concurrent thread: \(String(describing: type(of: task)))")
         }
     }
 
     func taskDidFinish(_ task: LaunchTask) {
-        log("Task finish \(String(describing: type(of: task)))  \(Int(task.executionDuration() * 1000))")
+        TaskWorkflow.log("Task finish \(String(describing: type(of: task)))  \(Int(task.executionDuration() * 1000))")
 
         if let semaphore, task.queue == .concurrentQueue {
             taskLock.lock()
             unfinishAsyncTaskCount -= 1
             if unfinishAsyncTaskCount == 0 {
-                log("semaphore will signal")
+                TaskWorkflow.log("semaphore will signal")
                 semaphore.signal()
             }
             taskLock.unlock()
@@ -132,14 +136,9 @@ extension TaskWorkflow: TaskDelegate {
 }
 
 extension TaskWorkflow {
-    public func measure(name: String, closure: () -> Void) {
-        let t = CFAbsoluteTimeGetCurrent()
-        log("\(name) start")
-        closure()
-        log("\(name) end duration: \(Int((CFAbsoluteTimeGetCurrent() - t) * 1000))")
-    }
-
-    public func log(_ text: String) {
-        print("[\(TaskWorkflow.tag)] \(text)")
+    public static func log(_ text: String) {
+        #if DEBUG
+            print("[\(TaskWorkflow.tag)] \(text)")
+        #endif
     }
 }
