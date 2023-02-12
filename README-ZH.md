@@ -52,15 +52,15 @@ workflow.start()
 ```
 假设任务 C 需要等待前面的并发任务（A、B）全部完成，则可以使用 workflow 的 addBlockingTasks 方法。
 ```
-                ╔═══════╗
-            ┌──>║   A   ║───┐
-            │   ╚═══════╝   │
-┌───────┐   │               │   ╔═══════╗    ┌────────┐
-│ Start │───┤               ├──>║   C   ║───>│ Finish │
-└───────┘   │               │   ╚═══════╝    └────────┘
-            │   ╔═══════╗   │
-            └──>║   B   ║───┘
-                ╚═══════╝
+              ╔═════╗
+          ┌──>║  A  ║───┐
+          │   ╚═════╝   │
+┌─────┐   │             │   ╔═════╗    ┌──────┐
+│Start│───┤             ├──>║  C  ║───>│Finish│
+└─────┘   │             │   ╚═════╝    └──────┘
+          │   ╔═════╗   │
+          └──>║  B  ║───┘
+              ╚═════╝
 ```
 具体的代码如下：
 ```
@@ -76,38 +76,35 @@ workflow.start()
 
 假设在 App 启动的时候，需要执行下图中的初始化步骤。
 ```
-                                       ╔═══════╗   ╔═══════╗
-                                    ┌─>║   C   ║──>║   D   ║─┐
-                                    │  ╚═══════╝   ╚═══════╝ │
-┌───────┐   ╔═══════╗   ╔═══════╗   │                        │   ╔═══════╗   ╔═══════╗   ┌────────┐
-│ Start │──>║   A   ║──>║   B   ║──>│                        ├──>║   G   ║──>║   H   ║──>│ Finish │
-└───────┘   ╚═══════╝   ╚═══════╝   │                        │   ╚═══════╝   ╚═══════╝   └────────┘
-                                    │        ╔═══════╗       │
-                                    ├───────>║   E   ║───────┤
-                                    │        ╚═══════╝       │
-                                    │                        │
-                                    │        ╔═══════╗       │
-                                    └───────>║   F   ║───────┘
-                                             ╚═══════╝
+                                 ╔═════╗   ╔═════╗
+                              ┌─>║  C  ║──>║  D  ║─┐
+                              │  ╚═════╝   ╚═════╝ │
+┌─────┐   ╔═════╗   ╔═════╗   │                    │   ╔═════╗   ╔═════╗   ┌──────┐
+│Start│──>║  A  ║──>║  B  ║──>│                    ├──>║  G  ║──>║  H  ║──>│Finish│
+└─────┘   ╚═════╝   ╚═════╝   │                    │   ╚═════╝   ╚═════╝   └──────┘
+                              │       ╔═════╗      │
+                              ├──────>║  E  ║──────┤
+                              │       ╚═════╝      │
+                              │                    │
+                              │       ╔═════╗      │
+                              └──────>║  F  ║──────┘
+                                      ╚═════╝
 ```
 对应的代码实现如下：
 ```Swift
-func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    let workflow = TaskWorkflow(name: "Launch")
-    workflow.delegate = self
-    workflow.addTask(TaskA())
-    workflow.addTask(TaskB())
-    workflow.addBlockingTasks([
-        TaskC(),
-        TaskD(),
-        TaskE(queue: .concurrentQueue),
-        TaskF(queue: .concurrentQueue),
-    ])
-    workflow.addTask(TaskG())
-    workflow.addTask(TaskH())
-    workflow.start()
-    return true
-}
+let workflow = TaskWorkflow(name: "Launch")
+workflow.delegate = self
+workflow.addTask(TaskA())
+workflow.addTask(TaskB())
+workflow.addBlockingTasks([
+    TaskC(),
+    TaskD(),
+    TaskE(queue: .concurrentQueue),
+    TaskF(queue: .concurrentQueue),
+])
+workflow.addTask(TaskG())
+workflow.addTask(TaskH())
+workflow.start()
 ```
 在上面的代码中，TaskG 会等待 BlockingTasks 中的任务全部执行完成后，才会继续执行。我们可以在 TaskG 中创建 App 的 RootViewController。在 BlockingTasks 中并发执行耗时的操作，比如预加载首页需要用到的资源，初始化重要的 SDK 等。
 如果想查 workflow 的执行时间线，可以在 workflow 结束时，生成时间线:

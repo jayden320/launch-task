@@ -52,15 +52,15 @@ workflow. start()
 ```
 Assuming task C needs to wait for all previous concurrent tasks (A, B) to complete, we can use the `addBlockingTasks` method of workflow.
 ```
-                ╔═══════╗
-            ┌──>║   A   ║───┐
-            │   ╚═══════╝   │
-┌───────┐   │               │   ╔═══════╗    ┌────────┐
-│ Start │───┤               ├──>║   C   ║───>│ Finish │
-└───────┘   │               │   ╚═══════╝    └────────┘
-            │   ╔═══════╗   │
-            └──>║   B   ║───┘
-                ╚═══════╝
+              ╔═════╗
+          ┌──>║  A  ║───┐
+          │   ╚═════╝   │
+┌─────┐   │             │   ╔═════╗    ┌──────┐
+│Start│───┤             ├──>║  C  ║───>│Finish│
+└─────┘   │             │   ╚═════╝    └──────┘
+          │   ╔═════╗   │
+          └──>║  B  ║───┘
+              ╚═════╝
 ```
 The specific code is as follows:
 ```
@@ -76,38 +76,35 @@ workflow. start()
 
 Assume that when the App starts, the initialization steps in the figure below need to be performed.
 ```
-                                       ╔═══════╗   ╔═══════╗
-                                    ┌─>║   C   ║──>║   D   ║─┐
-                                    │  ╚═══════╝   ╚═══════╝ │
-┌───────┐   ╔═══════╗   ╔═══════╗   │                        │   ╔═══════╗   ╔═══════╗   ┌────────┐
-│ Start │──>║   A   ║──>║   B   ║──>│                        ├──>║   G   ║──>║   H   ║──>│ Finish │
-└───────┘   ╚═══════╝   ╚═══════╝   │                        │   ╚═══════╝   ╚═══════╝   └────────┘
-                                    │        ╔═══════╗       │
-                                    ├───────>║   E   ║───────┤
-                                    │        ╚═══════╝       │
-                                    │                        │
-                                    │        ╔═══════╗       │
-                                    └───────>║   F   ║───────┘
-                                             ╚═══════╝
+                                 ╔═════╗   ╔═════╗
+                              ┌─>║  C  ║──>║  D  ║─┐
+                              │  ╚═════╝   ╚═════╝ │
+┌─────┐   ╔═════╗   ╔═════╗   │                    │   ╔═════╗   ╔═════╗   ┌──────┐
+│Start│──>║  A  ║──>║  B  ║──>│                    ├──>║  G  ║──>║  H  ║──>│Finish│
+└─────┘   ╚═════╝   ╚═════╝   │                    │   ╚═════╝   ╚═════╝   └──────┘
+                              │       ╔═════╗      │
+                              ├──────>║  E  ║──────┤
+                              │       ╚═════╝      │
+                              │                    │
+                              │       ╔═════╗      │
+                              └──────>║  F  ║──────┘
+                                      ╚═════╝
 ```
 The corresponding code implementation is as follows:
 ```Swift
-func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-     let workflow = TaskWorkflow(name: "Launch")
-     workflow. delegate = self
-     workflow. addTask(TaskA())
-     workflow. addTask(TaskB())
-     workflow.addBlockingTasks([
-         TaskC(),
-         TaskD(),
-         TaskE(queue: .concurrentQueue),
-         TaskF(queue: .concurrentQueue),
-     ])
-     workflow. addTask(TaskG())
-     workflow. addTask(TaskH())
-     workflow. start()
-     return true
-}
+let workflow = TaskWorkflow(name: "Launch")
+workflow. delegate = self
+workflow. addTask(TaskA())
+workflow. addTask(TaskB())
+workflow.addBlockingTasks([
+     TaskC(),
+     TaskD(),
+     TaskE(queue: .concurrentQueue),
+     TaskF(queue: .concurrentQueue),
+])
+workflow. addTask(TaskG())
+workflow. addTask(TaskH())
+workflow. start()
 ```
 In the above code, TaskG will wait for all tasks in BlockingTasks to complete before continuing. We can create the RootViewController of the App in TaskG. Perform time-consuming operations concurrently in BlockingTasks, such as preloading resources needed for the homepage, initializing important SDKs, etc.
 If we want to check the execution timeline of the workflow, we can generate a timeline at the end of the workflow:
