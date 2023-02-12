@@ -11,37 +11,37 @@ import LaunchTask
 
 class TaskA: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
 class TaskB: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
 class TaskC: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
 class TaskD: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
 class TaskE: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(2)
+        Thread.sleep(forTimeInterval: 0.1)
     }
 }
 
 class TaskF: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(5)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
@@ -59,30 +59,36 @@ class TaskG: LaunchTask {
 
 class TaskH: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
-    var launchWorkflow = TaskWorkflow(name: "Launch")
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         if NSClassFromString("XCTestCase") != nil {
             return true
         }
-        
-        launchWorkflow.setBlockingTasks([
-            TaskA(),
-            TaskB(),
-            TaskC(sons: [TaskD()]),
+        let workflow = TaskWorkflow(name: "Launch")
+        workflow.delegate = self
+        workflow.addTask(TaskA())
+        workflow.addTask(TaskB())
+        workflow.addBlockingTasks([
+            TaskC(),
+            TaskD(),
             TaskE(queue: .concurrentQueue),
             TaskF(queue: .concurrentQueue),
         ])
-        launchWorkflow.addTask(TaskG())
-        launchWorkflow.addTask(TaskH())
-        launchWorkflow.start()
+        workflow.addTask(TaskG())
+        workflow.addTask(TaskH())
+        workflow.start()
         return true
     }
 }
 
+extension AppDelegate: TaskWorkflowDelegate {
+    func workflowDidFinish(_ workflow: TaskWorkflow) {
+        print(workflow.generateTimeline())
+    }
+}

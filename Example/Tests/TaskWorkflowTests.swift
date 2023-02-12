@@ -12,16 +12,17 @@ final class TaskWorkflowTests: XCTestCase {
     func testStartWorkflow() throws {
         // Given
         let workflow = TaskWorkflow(name: "UT")
-        workflow.setBlockingTasks([
-            TaskA(),
-            TaskB(),
-            TaskC(sons: [TaskD()]),
+        workflow.addTask(TaskA())
+        workflow.addTask(TaskB())
+        workflow.addBlockingTasks([
+            TaskC(),
+            TaskD(),
             TaskE(queue: .concurrentQueue),
             TaskF(queue: .concurrentQueue),
         ])
         workflow.addTask(TaskG())
         workflow.addTask(TaskH())
-
+        
         let counter = TaskExecutionRecorder()
         for task in workflow.allTasks() {
             if let mockTask = task as? MockTask {

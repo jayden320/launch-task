@@ -11,19 +11,19 @@ import LaunchTask
 
 class TaskI: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
 class TaskJ: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
 class TaskK: LaunchTask {
     override func main(context: [AnyHashable: Any]?) {
-        sleep(1)
+        Thread.sleep(forTimeInterval: 0.2)
     }
 }
 
