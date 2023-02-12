@@ -44,11 +44,11 @@ let task = SelectorTask(name: "TaskName", target: self, selector: #selector(some
 ```
 After creating the Task instance, we need to add the Task to the workflow.
 ```Swift
-workflow. addTask(task)
+workflow.addTask(task)
 ```
 Finally, where the workflow needs to be executed, the start method is called.
 ```Swift
-workflow. start()
+workflow.start()
 ```
 Assuming task C needs to wait for all previous concurrent tasks (A, B) to complete, we can use the `addBlockingTasks` method of workflow.
 ```
@@ -68,8 +68,8 @@ workflow.addBlockingTasks([
      TaskA(),
      TaskB(queue: .concurrentQueue),
 ])
-workflow. addTask(TaskC())
-workflow. start()
+workflow.addTask(TaskC())
+workflow.start()
 ```
 
 ## Example
@@ -93,24 +93,24 @@ Assume that when the App starts, the initialization steps in the figure below ne
 The corresponding code implementation is as follows:
 ```Swift
 let workflow = TaskWorkflow(name: "Launch")
-workflow. delegate = self
-workflow. addTask(TaskA())
-workflow. addTask(TaskB())
+workflow.delegate = self
+workflow.addTask(TaskA())
+workflow.addTask(TaskB())
 workflow.addBlockingTasks([
      TaskC(),
      TaskD(),
      TaskE(queue: .concurrentQueue),
      TaskF(queue: .concurrentQueue),
 ])
-workflow. addTask(TaskG())
-workflow. addTask(TaskH())
-workflow. start()
+workflow.addTask(TaskG())
+workflow.addTask(TaskH())
+workflow.start()
 ```
 In the above code, TaskG will wait for all tasks in BlockingTasks to complete before continuing. We can create the RootViewController of the App in TaskG. Perform time-consuming operations concurrently in BlockingTasks, such as preloading resources needed for the homepage, initializing important SDKs, etc.
 If we want to check the execution timeline of the workflow, we can generate a timeline at the end of the workflow:
 ```Swift
 func workflowDidFinish(_ workflow: TaskWorkflow) {
-     print(workflow. generateTimeline())
+     print(workflow.generateTimeline())
 }
 ```
 The timeline is as follows
